@@ -116,6 +116,10 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 - Cost: each round is a real model call; the 3/5-round caps exist partly for this reason.
 - It's a process guard, not a sandbox. A determined agent can ignore it; it relies on the agent loading and following the skill.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) and the [Releases](https://github.com/kseungyong/claude-codex-consensus/releases) page.
+
 ## License
 
 MIT
