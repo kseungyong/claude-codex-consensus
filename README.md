@@ -109,6 +109,7 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 - `codex exec -s read-only` blocks **writes only**; Codex can still read outside the review directory. Mitigation here is a prompt-level read scope plus post-hoc audit of the log. Treat it as residual risk.
 - If the review directory is inside a git repo, Codex auto-loads that repo's `AGENTS.md` and follows it. The skill requires a directory outside any repo **and** `-c project_doc_max_bytes=0`.
 - Never send secrets, customer or financial data. Masking by command is not de-identification: read the whole copy before sending.
+- To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## Limits (honest)
 
