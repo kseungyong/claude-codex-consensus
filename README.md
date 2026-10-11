@@ -117,6 +117,16 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 - Cost: each round is a real model call; the 3/5-round caps exist partly for this reason.
 - It's a process guard, not a sandbox. A determined agent can ignore it; it relies on the agent loading and following the skill.
 
+## Contributing
+
+Issues and PRs are welcome; this is a one-person project, so expect slow replies.
+
+- **Bugs, questions, ideas:** open an [issue](https://github.com/kseungyong/claude-codex-consensus/issues). For vulnerabilities, use [SECURITY.md](SECURITY.md), not a public issue.
+- **Scripts:** `scripts/*.sh` must pass ShellCheck (CI runs it on every PR that touches `scripts/`).
+- **Changes to the rules in `SKILL.md`** (what the protocol requires or forbids) are design changes, so the protocol applies to them too. Describe the problem and the evidence, and expect the maintainer to run a Codex review round on the new version before merging. Wording-only fixes don't need this.
+- **Keep both languages in sync:** a rule change in `SKILL.md` needs the matching change in `SKILL.ko.md`; the two are reviewed for equivalence.
+- Don't commit review artifacts that contain secrets, customer data or personal files. Mask them first and read the whole copy.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) and the [Releases](https://github.com/kseungyong/claude-codex-consensus/releases) page.
