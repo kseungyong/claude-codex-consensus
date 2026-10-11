@@ -45,6 +45,7 @@ Before any hard-to-reverse / production-touching / design-fixing work, load the 
 | `scripts/run-codex-review.sh` | One review attempt with guards (git-repo check, no overwrite, verdict check) |
 | `examples/review-prompt.md` | Prompt template for Codex |
 | `docs/consensus-log-example.md` | The protocol's own review log |
+| `examples/run-1/` | Prompt and raw result of one real review round |
 
 ## Usage of the helper
 
@@ -53,6 +54,19 @@ R="$(mktemp -d)"            # must NOT be inside a git repo
 # copy + mask files, read them all yourself, write $R/prompt-1.md
 CODEX_MODEL=<optional-slug> scripts/run-codex-review.sh "$R" 1 1
 ```
+
+## Example run (real output, unedited)
+
+One round of `scripts/run-codex-review.sh` against this repo's own `SKILL.md` (sha256 `4583e8afb896`). Codex CLI 0.162.1, model `gpt-6-astra`, reasoning effort low, exit code 0. Prompt and full result: [`examples/run-1/`](examples/run-1/).
+
+```text
+F-01 | medium | static-check | Version binding does not specify how the masked review copy maps to the original execution artifact; hashing either alone cannot establish that the approved artifact is the one reviewed. | Record both hashes and the masking transformation, verify their correspondence locally, and invalidate approval when either artifact changes.
+F-02 | medium | static-check | "Run them against existing data immediately" is unconditional and can require live-system access or execution before consensus and approval, conflicting with the execution gate and pre-verification restrictions. | Limit immediate verification to permitted isolated checks; defer checks requiring gated access until explicitly approved and record pending verification.
+F-03 | medium | static-check | The mandatory read-scope audit has no defined evidence requirements or handling for incomplete visibility; exit code, fresh output, and valid format can pass while scope compliance remains unverifiable. | Require a documented scope audit before accepting a round and treat missing or insufficient access evidence as an unverified round requiring escalation.
+Verdict: no-consensus
+```
+
+What this shows: the verdict was **no-consensus** (3 medium, 0 high). The findings are not yet addressed in `SKILL.md`; under the protocol Claude would now accept or rebut each F-ID with evidence and re-run. Scope audit for this round: the log shows a single command (`ls -la && cat SKILL.md`) inside the review directory, so the round is valid.
 
 ## Security notes — read before use
 
