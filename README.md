@@ -3,7 +3,15 @@
 A Claude Code skill that stops an LLM agent from doing irreversible things on its own judgment.
 Claude drafts → Codex cross-reviews by severity → they converge on **evidence** → a **human approves** → only then does Claude execute.
 
-한국어: [아래](#한국어) · Korean original skill: [`skills/codex-consensus/SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)
+> **한국어 요약**
+> Claude가 산출물을 만들고, Codex가 심각도별로 교차검증하고, 둘이 **근거**로 차이를 좁힌 뒤, **사람이 승인**해야만 실행하는 Claude Code 스킬입니다. 되돌리기 어렵거나 · 프로덕션에 닿거나 · 설계를 고정하는 작업에 적용합니다.
+> - 같은 산출물을 해시로 버전 고정하고, 합의·승인은 그 버전에 묶입니다.
+> - 지적마다 안정 ID · 심각도 · 근거등급을 붙이고, 수용하거나 근거로 반박합니다(맹종 금지).
+> - 사실은 두 LLM의 동의가 아니라 실행(테스트·측정)으로 닫습니다.
+> - 한 지점이 3라운드, 총 5라운드 안에 안 좁혀지거나 심각도가 다투어지면 사람에게 에스컬레이션합니다.
+> - 합의 ≠ 승인: 합의 후에도 사람의 승인이 있어야 실행합니다.
+>
+> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 원본)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 Codex 검토 대상이 아니었습니다. 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
 
 ## Why
 
@@ -91,13 +99,3 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 ## License
 
 MIT
-
----
-
-## 한국어
-
-Claude가 산출물을 만들고, Codex가 심각도별로 교차검증하고, 둘이 **근거**로 차이를 좁힌 뒤, **사람이 승인**해야만 실행하는 프로토콜(Claude Code 스킬)입니다.
-
-핵심 규칙: 같은 산출물을 해시로 버전 고정 · 지적마다 안정 ID/심각도/근거등급 · 수용 또는 근거 반박(맹종 금지) · 사실은 실행(테스트·측정)으로 닫기 · 3라운드/총 5라운드 미수렴·심각도 분쟁 시 사람에게 에스컬레이션 · 합의 ≠ 승인.
-
-설치: `skills/codex-consensus/SKILL.md`(영문) 또는 `SKILL.ko.md`(한국어 원본)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 보안 주의사항(read-only의 읽기 비제한, AGENTS.md 자동 로드)은 위 Security notes를 참고하세요.
