@@ -2,6 +2,14 @@
 
 All notable changes to this project. Versions link to their GitHub releases.
 
+## [1.0.2] - 2026-10-11
+
+Documentation only. `SKILL.md`, `SKILL.ko.md` and `scripts/run-codex-review.sh` are unchanged, so the Codex consensus recorded for them still applies.
+
+### Added
+- `CHANGELOG.md`.
+- README: Changelog section linking to it.
+
 ## [1.0.1] - 2026-10-11
 
 Documentation only. `SKILL.md`, `SKILL.ko.md` and `scripts/run-codex-review.sh` are unchanged, so the Codex consensus recorded for them still applies.
@@ -21,5 +29,6 @@ First public release.
 - `examples/`: review prompt template and prompts/results of all real review rounds.
 - `docs/consensus-log-example.md`: the protocol's own review log.
 
+[1.0.2]: https://github.com/kseungyong/claude-codex-consensus/releases/tag/v1.0.2
 [1.0.1]: https://github.com/kseungyong/claude-codex-consensus/releases/tag/v1.0.1
 [1.0.0]: https://github.com/kseungyong/claude-codex-consensus/releases/tag/v1.0.0
