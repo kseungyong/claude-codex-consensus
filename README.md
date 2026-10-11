@@ -19,6 +19,19 @@ Claude drafts → Codex cross-reviews by severity → they converge on **evidenc
 >
 > 한계: 실전 검증이 부족합니다(한 사람의 워크플로용으로 만들고 이 프로토콜로 자체 검토만 함). 라운드마다 실제 모델 호출 비용이 들고, 샌드박스가 아니라 프로세스 가드라서 에이전트가 스킬을 따를 때만 작동합니다.
 
+## Quick Start
+
+1. Install and log in to the [Codex CLI](https://github.com/openai/codex) (`codex exec` must work).
+2. Install the skill:
+   ```bash
+   git clone https://github.com/kseungyong/claude-codex-consensus.git
+   mkdir -p ~/.claude/skills/codex-consensus
+   cp claude-codex-consensus/skills/codex-consensus/SKILL.md ~/.claude/skills/codex-consensus/
+   ```
+3. In Claude Code, ask for a risky change and name the skill, e.g. *"Use the codex-consensus skill before you migrate this schema."* (Or add the pointer from [Install](#install) to your `CLAUDE.md` so it triggers on its own.)
+4. Claude then saves the artifact and records its hash, sends a masked copy to Codex, answers each `F-NN` finding (fix or rebut with evidence), and repeats until consensus or escalation.
+5. Claude reports consensus status and open items and asks you to approve **that exact version**. Nothing executes before you do.
+
 ## Why
 
 A single model reviewing its own plan rubber-stamps it. Two models agreeing with each other is also not verification. This protocol forces:
