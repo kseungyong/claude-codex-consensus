@@ -16,6 +16,6 @@ Known, documented limits are not vulnerabilities: `codex exec -s read-only` does
 
 ## How to report
 
-Do **not** post exploit details publicly. Open an issue at https://github.com/kseungyong/claude-codex-consensus/issues titled `Security: please contact me`, with no technical details, and the maintainer will arrange a private channel. If GitHub private vulnerability reporting is enabled for this repo, use the *Report a vulnerability* button on the Security tab instead.
+Use GitHub's private vulnerability reporting: open the [Security tab](https://github.com/kseungyong/claude-codex-consensus/security) and click **Report a vulnerability**, or go directly to https://github.com/kseungyong/claude-codex-consensus/security/advisories/new. Do **not** post exploit details in public issues.
 
 This is a one-person project: expect an initial response within about a week, with no formal SLA.
