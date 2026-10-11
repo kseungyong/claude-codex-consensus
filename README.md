@@ -1,6 +1,6 @@
 # Claude ↔ Codex Consensus Protocol
 
-[![Release](https://img.shields.io/github/v/release/kseungyong/claude-codex-consensus)](https://github.com/kseungyong/claude-codex-consensus/releases/latest) [![License: MIT](https://img.shields.io/github/license/kseungyong/claude-codex-consensus)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/kseungyong/claude-codex-consensus)](https://github.com/kseungyong/claude-codex-consensus/releases/latest) [![ShellCheck](https://github.com/kseungyong/claude-codex-consensus/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/kseungyong/claude-codex-consensus/actions/workflows/shellcheck.yml) [![License: MIT](https://img.shields.io/github/license/kseungyong/claude-codex-consensus)](LICENSE)
 
 A Claude Code skill that gates an LLM agent's irreversible actions behind cross-review consensus and human approval.
 Claude drafts → Codex cross-reviews by severity → they converge on **evidence** → a **human approves** → only then does Claude execute.
