@@ -25,6 +25,8 @@ Conflict resolution, new implementation and config changes are **not** pre-verif
 DIRECTION → SPEC → PLAN → CODE (diff). Only the stages that apply; each stage must reach consensus before the next.
 Record an artifact **version** every round (commit hash or `shasum -a 256`). Consensus and approval are bound to that version and execution scope. If the artifact changes afterwards, re-review from the affected stage.
 
+If the reviewed copy is masked, record **both** hashes (original and masked copy) plus the masking transformation (what was replaced, how). Before asking for approval, verify locally that the masked copy equals the original apart from that recorded transformation. Approval binds to the **original** hash; if either hash changes, approval is void.
+
 ## Round loop
 
 1. Claude writes/revises → saves the artifact file, records the version.
@@ -34,7 +36,7 @@ Record an artifact **version** every round (commit hash or `shasum -a 256`). Con
 
 **Consensus =** zero factual/code differences · zero Codex "high" · zero unresolved Claude rebuttals. Remaining medium/low items are recorded explicitly as **agreed open items** — never silently dropped.
 
-**Facts are closed by execution, not agreement** — measurement, tests, builds, real data. Two LLMs agreeing is not verification. Fix acceptance criteria and thresholds **before** looking at data, and run them against existing data immediately to catch self-contradiction.
+**Facts are closed by execution, not agreement** — measurement, tests, builds, real data. Two LLMs agreeing is not verification. Fix acceptance criteria and thresholds **before** looking at data, and run them immediately against data already in hand (local or isolated copies) to catch self-contradiction. Checks that need gated access (production data, live systems, external writes) are not run here: record them as **pending verification** and run them only after approval, within the approved scope. A pending check is a **gate**: the dependent action runs only if the check passes. A failed or inconclusive result halts that action and returns to review or human escalation. Never proceed on the approved plan alone.
 
 ## Escalate to the human immediately
 
@@ -50,6 +52,7 @@ Send: schemas, code, diffs, metrics, plans. **Do not send:** secrets/tokens/real
 - Copy only the needed files into the review directory and mask sensitive values; **read the entire copy yourself before the call** (running a masking command ≠ de-identification).
 - Log what was masked. Don't close judgments that depend on masked information by consensus — verify locally or escalate.
 - **Limitation:** `-s read-only` only blocks writes; it does not restrict what Codex can read. Controls are an explicit read scope in the prompt plus post-hoc audit. If the audit shows access outside the directory, void the round and report it. Skipping the audit breaks the risk acceptance.
+- **Audit evidence:** a round is accepted only with a recorded audit: the list of commands/file reads taken from `raw-N.A.log`, each checked to be inside the review directory. If the log is missing, truncated, or does not show tool activity well enough to judge, the round is **unverified**: do not adopt it; retry (new attempt) or escalate to the human.
 
 ## How to call Codex
 
@@ -69,7 +72,7 @@ Pin a model with `-m <slug>` if you want reproducibility (the helper script read
 
 **Instruction-file leak guard:** if the review directory is inside a git repo, Codex auto-loads that repo root's `AGENTS.md` as instructions, transmits it, and follows it (e.g. "read my memory files"). Observed in practice. Apply **both**: a directory outside any repo **and** `-c project_doc_max_bytes=0`.
 
-**Accepting a result:** exit code 0, a `round-N.A.md` freshly created by *this* attempt, and the requested format satisfied. If any fails, log it as a failure, bump A and retry, or tell the user. Keep every attempt's result, raw log and exit code (audit trail).
+**Accepting a result:** exit code 0, a `round-N.A.md` freshly created by *this* attempt, the requested format satisfied, and a passing scope audit (see Data egress). If any fails, log it as a failure, bump A and retry, or tell the user. Keep every attempt's result, raw log and exit code (audit trail).
 
 **Required prompt contents:** read-scope restriction to the review directory, artifact path and version, review angle, prior findings and responses, output format (`F-NN | severity | evidence grade | finding | suggestion`), no rubber-stamping and no invented blockers, last line `Verdict: consensus|no-consensus`. See `examples/review-prompt.md`.
 

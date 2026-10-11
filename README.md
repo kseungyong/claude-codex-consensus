@@ -45,7 +45,7 @@ Before any hard-to-reverse / production-touching / design-fixing work, load the 
 | `scripts/run-codex-review.sh` | One review attempt with guards (git-repo check, no overwrite, verdict check) |
 | `examples/review-prompt.md` | Prompt template for Codex |
 | `docs/consensus-log-example.md` | The protocol's own review log |
-| `examples/run-1/` | Prompt and raw result of one real review round |
+| `examples/run-1..3/` | Prompt and raw result of each real review round |
 
 ## Usage of the helper
 
@@ -55,9 +55,9 @@ R="$(mktemp -d)"            # must NOT be inside a git repo
 CODEX_MODEL=<optional-slug> scripts/run-codex-review.sh "$R" 1 1
 ```
 
-## Example run (real output, unedited)
+## Example run (round 1, real output, unedited)
 
-One round of `scripts/run-codex-review.sh` against this repo's own `SKILL.md` (sha256 `4583e8afb896`). Codex CLI 0.162.1, model `gpt-6-astra`, reasoning effort low, exit code 0. Prompt and full result: [`examples/run-1/`](examples/run-1/).
+One round of `scripts/run-codex-review.sh` against this repo's own `SKILL.md` (sha256 `4583e8afb896`). Codex CLI 0.162.1, model `gpt-6-astra`, reasoning effort low, exit code 0. Prompt and full result: [`examples/run-1/`](examples/run-1/). Rounds 2–3 follow below the output.
 
 ```text
 F-01 | medium | static-check | Version binding does not specify how the masked review copy maps to the original execution artifact; hashing either alone cannot establish that the approved artifact is the one reviewed. | Record both hashes and the masking transformation, verify their correspondence locally, and invalidate approval when either artifact changes.
@@ -66,7 +66,15 @@ F-03 | medium | static-check | The mandatory read-scope audit has no defined evi
 Verdict: no-consensus
 ```
 
-What this shows: the verdict was **no-consensus** (3 medium, 0 high). The findings are not yet addressed in `SKILL.md`; under the protocol Claude would now accept or rebut each F-ID with evidence and re-run. Scope audit for this round: the log shows a single command (`ls -la && cat SKILL.md`) inside the review directory, so the round is valid.
+What this shows: round 1 was **no-consensus** (3 medium, 0 high). Claude accepted all three, edited `SKILL.md`, and re-ran:
+
+| Round | Artifact sha256 | Result |
+|---|---|---|
+| 1 | `4583e8afb896` | no-consensus: F-01, F-02, F-03 (medium) |
+| 2 | `b9d417ecf665` | no-consensus: F-01~F-03 RESOLVED; new F-04 (medium): pending verification had no outcome gate |
+| 3 | `c5b82327237e` | **consensus**: F-04 RESOLVED, no open findings |
+
+Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`. Scope audit: in every round the log shows only in-directory commands (`ls`/`rg --files`/`cat SKILL.md`/`shasum`), so all rounds are valid. Consensus is bound to `c5b82327237e`; the Korean `SKILL.ko.md` was synced afterwards by hand and was **not** part of the reviewed artifact. Caveat: this is a single reviewer at low reasoning effort; per the protocol, facts are closed by execution, not by two models agreeing.
 
 ## Security notes — read before use
 

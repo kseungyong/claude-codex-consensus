@@ -1,0 +1,2 @@
+F-04 | medium | static-check | RESOLVED: Pending verification explicitly gates the dependent action; failed or inconclusive checks halt it and require review or human escalation. Approval alone cannot bypass verification. | None.
+Verdict: consensus

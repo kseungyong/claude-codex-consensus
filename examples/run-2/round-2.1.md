@@ -1,0 +1,5 @@
+F-01 | medium | static-check | RESOLVED: Masked reviews now record both hashes and the transformation, require local equivalence verification, and bind approval to the original hash. | Retain these requirements.
+F-02 | medium | static-check | RESOLVED: Immediate verification is limited to local or isolated data already available; gated checks remain pending until approval. | Retain this distinction.
+F-03 | medium | static-check | RESOLVED: Acceptance now requires a recorded scope audit supported by sufficiently complete tool logs; inadequate evidence invalidates acceptance. | Retain this acceptance gate.
+F-04 | medium | static-check | Pending verification has no mandatory outcome gate: after approval, an agent can run a check, observe failure, and still execute the approved change without violating an explicit stop rule. | Require prerequisite checks to pass before dependent actions; failed or inconclusive checks must halt those actions and return to review or human escalation.
+Verdict: no-consensus
