@@ -1,6 +1,6 @@
 # Claude ↔ Codex Consensus Protocol
 
-A Claude Code skill that stops an LLM agent from doing irreversible things on its own judgment.
+A Claude Code skill that gates an LLM agent's irreversible actions behind cross-review consensus and human approval.
 Claude drafts → Codex cross-reviews by severity → they converge on **evidence** → a **human approves** → only then does Claude execute.
 
 > **한국어 요약**
@@ -11,7 +11,11 @@ Claude drafts → Codex cross-reviews by severity → they converge on **evidenc
 > - 한 지점이 3라운드, 총 5라운드 안에 안 좁혀지거나 심각도가 다투어지면 사람에게 에스컬레이션합니다.
 > - 합의 ≠ 승인: 합의 후에도 사람의 승인이 있어야 실행합니다.
 >
-> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 원본)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 Codex 검토 대상이 아니었습니다. 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
+> 필요 조건: [Codex CLI](https://github.com/openai/codex)(`codex exec`)가 설치돼 있어야 합니다.
+>
+> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 판)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 Codex 검토 대상이 아니었습니다. 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
+>
+> 한계: 실전 검증이 부족합니다(한 사람의 워크플로용으로 만들고 이 프로토콜로 자체 검토만 함). 라운드마다 실제 모델 호출 비용이 들고, 샌드박스가 아니라 프로세스 가드라서 에이전트가 스킬을 따를 때만 작동합니다.
 
 ## Why
 
@@ -19,7 +23,7 @@ A single model reviewing its own plan rubber-stamps it. Two models agreeing with
 
 - **Same artifact, versioned** — consensus is bound to a hash, so "I tweaked it after approval" voids it.
 - **Stable finding IDs + severity + evidence grade** — disagreements are traceable, not vibes.
-- **Rebut or accept, never fold** — blind acceptance is logged as a failure mode.
+- **Rebut or accept, never fold** — blind acceptance is treated as capitulation, not consensus.
 - **Facts closed by execution** (tests, builds, measurements), not by two LLMs nodding.
 - **Hard escalation rules** — unresolved after 3 rounds on one point, disputed severity, 5 rounds total → human decides.
 - **Human approval is separate from consensus.**
@@ -49,7 +53,7 @@ Before any hard-to-reverse / production-touching / design-fixing work, load the 
 | Path | What |
 |---|---|
 | `skills/codex-consensus/SKILL.md` | The skill (English) |
-| `skills/codex-consensus/SKILL.ko.md` | Original Korean version |
+| `skills/codex-consensus/SKILL.ko.md` | Korean version (hand-synced, not Codex-reviewed) |
 | `scripts/run-codex-review.sh` | One review attempt with guards (git-repo check, no overwrite, verdict check) |
 | `examples/review-prompt.md` | Prompt template for Codex |
 | `docs/consensus-log-example.md` | The protocol's own review log |
