@@ -3,9 +3,9 @@ name: codex-consensus
 description: Use when about to do anything hard to reverse, production-touching, or design-fixing (deploys, upgrades, migrations, schema/config changes, merges into live branches, specs and plans that lock a design) — before execution, including when it feels "safe enough to skip review" or the user is waiting. Also /codex-consensus.
 ---
 
-# Claude ↔ Codex 합의 프로토콜 (한국어 원본)
+# Claude ↔ Codex 합의 프로토콜 (한국어 번역)
 
-> 영문 정본: `SKILL.md`. 이 파일은 한국어 원본이며 모델 슬러그·ORCA 등 개인 환경 의존 부분은 일반화했다.
+> 영문 정본: `SKILL.md`. 이 파일은 그 한국어 번역판이다.
 
 ## 핵심
 Claude(주도)가 만든 **같은 산출물**을 Codex(교차검증)가 심각도별로 지적하고, 근거로 협의해 차이를 0으로 좁힌다.
@@ -39,7 +39,7 @@ DIRECTION → SPEC → PLAN → CODE(diff). 해당하는 단계만, 각 단계�
 ## 에스컬레이션 (즉시 사람에게)
 - A 판단 차이(가치·투자·설계 선택)가 근거로 안 좁혀짐 — 거짓 합의로 봉합 금지
 - B 같은 지점이 3라운드 안에 안 좁혀짐. ID 재명명·분할·병합은 카운트를 초기화하지 않는다
-- C 무엇이 사실인지 자체가 안 좁혀짐
+- C 무엇을 사실로 인정할지 자체가 다투어짐
 - D 심각도 자체가 다투어짐 — 라운드 소모 없이 바로
 - E 한 산출물이 총 5라운드에 도달해도 미합의 (새 지적이 계속 생기는 무한 루프 방지)
 
@@ -47,25 +47,25 @@ DIRECTION → SPEC → PLAN → CODE(diff). 해당하는 단계만, 각 단계�
 보내는 것: 스키마·코드·diff·메트릭·계획. **보내지 않는 것:** 시크릿/토큰/config 실값, 고객·CRM·재무 데이터, 개인 기억·실명 원문.
 - 검토 디렉터리에 필요한 파일만 복사하고 민감값을 가린 뒤, **복사본 전체를 호출 전에 직접 훑어** 남은 민감값이 없는지 확인한다(가리기 명령 실행 ≠ 비식별 완료).
 - 가린 항목을 로그에 기록한다. 가려진 정보에 의존하는 판단은 합의로 닫지 말고 로컬 실행으로 검증하거나 사람에게 올린다.
-- **한계:** `-s read-only`는 쓰기만 막고 읽기 범위는 제한하지 않는다. 통제 수단은 프롬프트의 읽기 범위 지정과 사후 감사다. 감사에서 디렉터리 밖 접근이 보이면 해당 라운드를 무효로 하고 사용자에게 보고한다. 이 잔여 위험을 수용하는 것은 사용자의 결정이며, 감사를 생략하면 수용 조건이 깨진다.
+- **한계:** `-s read-only`는 쓰기만 막고 읽기 범위는 제한하지 않는다. 통제 수단은 프롬프트의 읽기 범위 지정과 사후 감사다. 감사에서 디렉터리 밖 접근이 보이면 해당 라운드를 무효로 하고 사용자에게 보고한다. 감사를 생략하면 수용 조건이 깨진다.
 - **감사 증거:** `raw-N.A.log`에서 뽑은 명령·파일 읽기 목록과, 각각이 검토 디렉터리 안임을 확인한 기록이 있어야 라운드를 채택한다. 로그가 없거나 잘렸거나 판단할 만큼 활동이 보이지 않으면 라운드는 **미검증**이다: 채택하지 말고 재시도(새 시도 번호)하거나 사람에게 에스컬레이션한다.
 
 ## 호출 방법
-**기본: codex exec (비대화형)** — 플래그는 codex-cli 0.155 `codex exec --help`로 확인한 것이다.
+**기본: codex exec (비대화형)** — `scripts/run-codex-review.sh` 또는 아래의 동등한 명령을 사용한다. 플래그는 codex-cli 0.155 `codex exec --help`로 확인한 것이다.
 ```bash
-R="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")" || exit 1   # 반드시 git 저장소 밖 (git -C "$R" rev-parse 실패 확인)
+R="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")" || exit 1   # 반드시 git 저장소 밖
 # 산출물·대상 파일 복사 → 가리기 → 전체 점검 → "$R/prompt-1.md" 작성
 N=1; A=1   # N=라운드, A=그 라운드의 시도 번호 (재시도마다 A 증가, 덮어쓰기 금지)
 perl -e 'alarm 900; exec @ARGV' codex exec -c project_doc_max_bytes=0 -s read-only --skip-git-repo-check --ephemeral \
   -C "$R" -o "$R/round-$N.$A.md" - < "$R/prompt-$N.md" > "$R/raw-$N.$A.log" 2>&1
 echo "exit=$?" | tee "$R/exit-$N.$A"
 ```
-재현성이 필요하면 `-m <슬러그>`로 모델을 고정하고(헬퍼 스크립트는 `CODEX_MODEL` 환경변수 사용) `raw-N.A.log` 헤더의 `model:`을 라운드별로 기록한다. 플래그는 codex-cli 0.155~0.162 `codex exec --help` 기준이므로 버전이 다르면 재확인한다.
+재현성이 필요하면 `-m <슬러그>`로 모델을 고정할 수 있다(헬퍼 스크립트는 `CODEX_MODEL` 환경변수 사용). 고정 여부와 무관하게 `raw-N.A.log` 헤더의 `model:`을 확인해 라운드별로 기록한다. 플래그는 codex-cli 0.155~0.162 `codex exec --help` 기준이므로 버전이 다르면 재확인한다.
 **지침 파일 유출 방지:** 검토 디렉터리가 git 저장소 안이면 Codex가 저장소 루트의 `AGENTS.md`를 지침으로 자동 로드해 전송하고 그 지시(예: 개인 기억 파일 읽기)를 따른다(실측). 저장소 밖 디렉터리 + `-c project_doc_max_bytes=0` 둘 다 적용한다.
 
 **결과 채택 조건:** 종료 코드 0, 이번 시도가 새로 만든 `round-N.A.md`, 요구한 형식 충족, 범위 감사 통과. 하나라도 틀리면 실패로 기록하고 A를 올려 재시도하거나 사용자에게 알린다. 모든 시도의 결과·raw 로그·종료 코드를 보존한다(감사용).
 
-**프롬프트 필수 항목:** 검토 디렉터리만 읽으라는 범위 지정, 산출물 경로·버전, 검토 관점, 이전 라운드 지적·대응, 출력 형식(`F-NN | 심각도 | 근거등급 | 지적 | 제안`), rubber-stamp 금지·없는 blocker 금지, 마지막 줄 `판정: 합의|미합의`.
+**프롬프트 필수 항목:** 검토 디렉터리만 읽으라는 범위 지정, 산출물 경로·버전, 검토 관점, 이전 라운드 지적·대응, 출력 형식(`F-NN | 심각도 | 근거등급 | 지적 | 제안`), rubber-stamp 금지·없는 blocker 금지, 마지막 줄 `Verdict: consensus|no-consensus`(판정 리터럴은 정본과 동일하게 영문; 헬퍼 스크립트는 `판정:`도 허용). `examples/review-prompt.md` 참조.
 
 **대안:** Codex 워커를 돌릴 수 있는 오케스트레이션 계층이면 무엇이든 가능하나 동일 규칙(같은 산출물·안정 ID·버전 고정·기록)을 지켜야 한다. 워커가 준비 단계에서 실패하면 원인을 단정하지 말고 실제 대기 사유를 확인하고, CLI 업데이트는 사용자 확인 후에 한다.
 

@@ -13,7 +13,7 @@ Claude drafts → Codex cross-reviews by severity → they converge on **evidenc
 >
 > 필요 조건: [Codex CLI](https://github.com/openai/codex)(`codex exec`)가 설치돼 있어야 합니다.
 >
-> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 판)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 Codex 검토 대상이 아니었습니다. 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
+> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 판)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 영문 정본과의 규범 일치 여부를 Codex가 3라운드로 따로 검토했습니다(`6d182193b4a2`, `examples/ko-run-1..3/`). 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
 >
 > 한계: 실전 검증이 부족합니다(한 사람의 워크플로용으로 만들고 이 프로토콜로 자체 검토만 함). 라운드마다 실제 모델 호출 비용이 들고, 샌드박스가 아니라 프로세스 가드라서 에이전트가 스킬을 따를 때만 작동합니다.
 
@@ -53,11 +53,12 @@ Before any hard-to-reverse / production-touching / design-fixing work, load the 
 | Path | What |
 |---|---|
 | `skills/codex-consensus/SKILL.md` | The skill (English) |
-| `skills/codex-consensus/SKILL.ko.md` | Korean version (hand-synced, not Codex-reviewed) |
+| `skills/codex-consensus/SKILL.ko.md` | Korean translation (separately Codex-reviewed against `SKILL.md`) |
 | `scripts/run-codex-review.sh` | One review attempt with guards (git-repo check, no overwrite, verdict check) |
 | `examples/review-prompt.md` | Prompt template for Codex |
 | `docs/consensus-log-example.md` | The protocol's own review log |
-| `examples/run-1..3/` | Prompt and raw result of each real review round |
+| `examples/run-1..3/` | Prompt and raw result of each review round of `SKILL.md` |
+| `examples/ko-run-1..3/` | Same, for the Korean translation `SKILL.ko.md` |
 
 ## Usage of the helper
 
@@ -86,7 +87,7 @@ What this shows: round 1 was **no-consensus** (3 medium, 0 high). Claude accepte
 | 2 | `b9d417ecf665` | no-consensus: F-01~F-03 RESOLVED; new F-04 (medium): pending verification had no outcome gate |
 | 3 | `c5b82327237e` | **consensus**: F-04 RESOLVED, no open findings |
 
-Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`. Scope audit: in every round the log shows only in-directory commands (`ls`/`rg --files`/`cat SKILL.md`/`shasum`), so all rounds are valid. Consensus is bound to `c5b82327237e`; the Korean `SKILL.ko.md` was synced afterwards by hand and was **not** part of the reviewed artifact. Caveat: this is a single reviewer at low reasoning effort; per the protocol, facts are closed by execution, not by two models agreeing.
+Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`. Scope audit: in every round the log shows only in-directory commands (`ls`/`rg --files`/`cat SKILL.md`/`shasum`), so all rounds are valid. Consensus is bound to `c5b82327237e`; the Korean `SKILL.ko.md` was synced by hand afterwards and then reviewed separately for normative equivalence with `SKILL.md`: 3 rounds, 8 findings (as labeled by Codex: 5 high, 1 medium, 2 low; the author considered F-05..F-07 medium), all accepted and fixed, consensus on `6d182193b4a2` (prompts/results in `examples/ko-run-1..3/`). Caveat: this is a single reviewer at low reasoning effort; per the protocol, facts are closed by execution, not by two models agreeing.
 
 ## Security notes — read before use
 

@@ -1,0 +1,5 @@
+F-01 | high | static-check | SKILL.ko.md:68 changes the required final-line literals from “Verdict: consensus/no-consensus” to “판정: 합의/미합의”, producing a different output contract. | Preserve the canonical English verdict literals.
+F-02 | high | static-check | SKILL.ko.md:42 changes escalation C from a dispute over what counts as fact to a failure to narrow that dispute, potentially delaying immediate escalation while reconciliation is attempted. | Use “무엇을 사실로 인정할지 자체가 다투어짐” to preserve escalation upon dispute.
+F-03 | medium | static-check | SKILL.ko.md:54 omits the canonical instruction identifying scripts/run-codex-review.sh as the helper to use, although line 63 still references an unnamed helper. | Restore “scripts/run-codex-review.sh 또는 아래의 동등한 명령을 사용한다.”
+F-04 | low | static-check | SKILL.ko.md:8 retains an ORCA-specific provenance note absent from the canonical file, despite the requested removal of personal/environment-specific remnants. | Remove the historical environment note and identify this file simply as the Korean translation of SKILL.md.
+Verdict: no-consensus
