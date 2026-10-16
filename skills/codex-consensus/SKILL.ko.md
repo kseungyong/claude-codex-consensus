@@ -7,6 +7,8 @@ description: Use when about to do anything hard to reverse, production-touching,
 
 > 영문 정본: `SKILL.md`. 이 파일은 그 한국어 번역판이다.
 
+방향: **Claude 주도 → Codex 검토**. Codex 주도 작업은 함께 배포되는 `claude-consensus` 스킬을 설치한다. 두 스킬을 재귀 호출하지 않는다.
+
 ## 핵심
 Claude(주도)가 만든 **같은 산출물**을 Codex(교차검증)가 심각도별로 지적하고, 근거로 협의해 차이를 0으로 좁힌다.
 **합의 + 사람 승인** 둘 다 있어야 Claude가 실행(코딩·배포·전환)한다. 사람 = 판단 차이의 심판이자 실행 승인자.

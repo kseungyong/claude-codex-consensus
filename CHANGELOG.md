@@ -2,6 +2,13 @@
 
 All notable changes to this project. Versions link to their GitHub releases.
 
+## Unreleased — bidirectional support (2026-10-16)
+
+- Add `claude-consensus` for Codex-led Claude review, with English/Korean entry points.
+- Add a tool-free Claude runner, unique attempt logs, packet hashing and strict result validation.
+- Document installation and direction selection while preserving the original forward helper and historical examples.
+- Add offline runner tests and CI coverage. Earlier consensus hashes apply only to the historical artifacts, not these additions.
+
 ## [1.0.5] - 2026-10-11
 
 Documentation only. `SKILL.md`, `SKILL.ko.md` and `scripts/run-codex-review.sh` are unchanged, so the Codex consensus recorded for them still applies.

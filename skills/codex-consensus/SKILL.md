@@ -5,6 +5,8 @@ description: Use before doing anything hard to reverse, production-touching, or 
 
 # Claude ↔ Codex Consensus Protocol
 
+Direction: **Claude leads → Codex reviews**. For Codex-led work, install the sibling `claude-consensus` skill; do not recursively invoke both skills.
+
 ## Core idea
 
 Claude (lead) produces an artifact. Codex (cross-reviewer) critiques **the same artifact** by severity. They negotiate on evidence until the disagreement is zero.

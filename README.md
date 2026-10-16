@@ -2,35 +2,35 @@
 
 [![Release](https://img.shields.io/github/v/release/kseungyong/claude-codex-consensus)](https://github.com/kseungyong/claude-codex-consensus/releases/latest) [![ShellCheck](https://github.com/kseungyong/claude-codex-consensus/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/kseungyong/claude-codex-consensus/actions/workflows/shellcheck.yml) [![License: MIT](https://img.shields.io/github/license/kseungyong/claude-codex-consensus)](LICENSE)
 
-A Claude Code skill that gates an LLM agent's irreversible actions behind cross-review consensus and human approval.
-Claude drafts → Codex cross-reviews by severity → they converge on **evidence** → a **human approves** → only then does Claude execute.
+Bidirectional cross-review skills for **Claude Code and Codex**. The leading agent drafts; the other reviews the same version; disagreements are resolved using evidence; human execution authorization remains separate.
 
-> **한국어 요약**
-> Claude가 산출물을 만들고, Codex가 심각도별로 교차검증하고, 둘이 **근거**로 차이를 좁힌 뒤, **사람이 승인**해야만 실행하는 Claude Code 스킬입니다. 되돌리기 어렵거나 · 프로덕션에 닿거나 · 설계를 고정하는 작업에 적용합니다.
-> - 같은 산출물을 해시로 버전 고정하고, 합의·승인은 그 버전에 묶입니다.
-> - 지적마다 안정 ID · 심각도 · 근거등급을 붙이고, 수용하거나 근거로 반박합니다(맹종 금지).
-> - 사실은 두 LLM의 동의가 아니라 실행(테스트·측정)으로 닫습니다.
-> - 한 지점이 3라운드, 총 5라운드 안에 안 좁혀지거나 심각도가 다투어지면 사람에게 에스컬레이션합니다.
-> - 합의 ≠ 승인: 합의 후에도 사람의 승인이 있어야 실행합니다.
->
-> 필요 조건: [Codex CLI](https://github.com/openai/codex)(`codex exec`)가 설치돼 있어야 합니다.
->
-> 설치: `skills/codex-consensus/SKILL.md`(영문 정본) 또는 [`SKILL.ko.md`](skills/codex-consensus/SKILL.ko.md)(한국어 판)를 `~/.claude/skills/codex-consensus/SKILL.md`로 복사하세요. 한국어 판은 영문 정본과의 규범 일치 여부를 Codex가 3라운드로 따로 검토했습니다(`6d182193b4a2`, `examples/ko-run-1..3/`). 보안 주의(`read-only`는 읽기를 막지 않음, `AGENTS.md` 자동 로드)는 아래 Security notes를 꼭 읽으세요.
->
-> 한계: 실전 검증이 부족합니다(한 사람의 워크플로용으로 만들고 이 프로토콜로 자체 검토만 함). 라운드마다 실제 모델 호출 비용이 들고, 샌드박스가 아니라 프로세스 가드라서 에이전트가 스킬을 따를 때만 작동합니다.
+| Lead | Reviewer | Skill | Install location |
+|---|---|---|---|
+| Claude | Codex | `codex-consensus` | `~/.claude/skills/codex-consensus/` |
+| Codex | Claude | `claude-consensus` | `~/.codex/skills/claude-consensus/` |
+
+**한국어:** 기존 Claude → Codex 흐름에 Codex → Claude 흐름을 추가했습니다. 주도 에이전트에 맞는 스킬 하나를 사용하며, 두 스킬을 재귀 호출하지 않습니다. 기존 설치 경로와 명령은 유지됩니다. 새 역방향 스킬의 한국어판은 [SKILL.ko.md](skills/claude-consensus/SKILL.ko.md)입니다.
 
 ## Quick Start
 
-1. Install and log in to the [Codex CLI](https://github.com/openai/codex) (`codex exec` must work).
-2. Install the skill:
-   ```bash
-   git clone https://github.com/kseungyong/claude-codex-consensus.git
-   mkdir -p ~/.claude/skills/codex-consensus
-   cp claude-codex-consensus/skills/codex-consensus/SKILL.md ~/.claude/skills/codex-consensus/
-   ```
-3. In Claude Code, ask for a risky change and name the skill, e.g. *"Use the codex-consensus skill before you migrate this schema."* (Or add the pointer from [Install](#install) to your `CLAUDE.md` so it triggers on its own.)
-4. Claude then saves the artifact and records its hash, sends a masked copy to Codex, answers each `F-NN` finding (fix or rebut with evidence), and repeats until consensus or escalation.
-5. Claude reports consensus status and open items and asks you to approve **that exact version**. Nothing executes before you do.
+Install and authenticate the reviewer CLI (`codex` for the forward direction, `claude` for reverse).
+
+```bash
+git clone https://github.com/kseungyong/claude-codex-consensus.git
+cd claude-codex-consensus
+# Claude leads → Codex reviews (existing entry point)
+mkdir -p ~/.claude/skills/codex-consensus
+cp skills/codex-consensus/SKILL.md ~/.claude/skills/codex-consensus/
+# Codex leads → Claude reviews (copy the helper too)
+mkdir -p ~/.codex/skills/claude-consensus
+cp -R skills/claude-consensus/. ~/.codex/skills/claude-consensus/
+```
+
+In Claude: “Use codex-consensus to review this plan.”
+In Codex: “Use $claude-consensus to review this plan.”
+Restart the host or start a new session if it has not discovered a newly installed skill.
+
+The protocol tracks stable findings and artifact hashes, accepts fixes or evidence-backed rebuttals, and caps unresolved disagreements at 3 rounds per point / 5 rounds per artifact. Agreement is not test evidence or new execution permission. Historical examples below cover the original forward workflow only.
 
 ## Why
 
@@ -55,7 +55,7 @@ mkdir -p ~/.claude/skills/codex-consensus
 cp skills/codex-consensus/SKILL.md ~/.claude/skills/codex-consensus/
 ```
 
-Requires the [Codex CLI](https://github.com/openai/codex) (`codex exec`). Developed against codex-cli 0.155–0.162; re-check flags with `codex exec --help` on your version.
+The forward direction requires the [Codex CLI](https://github.com/openai/codex) (`codex exec`). Developed against codex-cli 0.155–0.162; re-check flags with `codex exec --help` on your version.
 
 Optionally add a pointer in your `CLAUDE.md`:
 
@@ -69,6 +69,9 @@ Before any hard-to-reverse / production-touching / design-fixing work, load the 
 |---|---|
 | `skills/codex-consensus/SKILL.md` | The skill (English) |
 | `skills/codex-consensus/SKILL.ko.md` | Korean translation (separately Codex-reviewed against `SKILL.md`) |
+| `skills/claude-consensus/SKILL.md` | Reverse skill: Codex leads, Claude reviews |
+| `skills/claude-consensus/SKILL.ko.md` | Korean reverse skill |
+| `skills/claude-consensus/scripts/review.py` | Tool-free Claude review helper with unique attempt logs |
 | `scripts/run-codex-review.sh` | One review attempt with guards (git-repo check, no overwrite, verdict check) |
 | `examples/review-prompt.md` | Prompt template for Codex |
 | `docs/consensus-log-example.md` | The protocol's own review log |
@@ -82,6 +85,17 @@ R="$(mktemp -d)"            # must NOT be inside a git repo
 # copy + mask files, read them all yourself, write $R/prompt-1.md
 CODEX_MODEL=<optional-slug> scripts/run-codex-review.sh "$R" 1 1
 ```
+
+Reverse implementation validation: [review log](docs/bidirectional-review.md) and [actual review packets/results](examples/reverse-review/). Seven offline helper tests passed; the final Claude review had no findings.
+
+## Reverse helper
+
+```bash
+python3 skills/claude-consensus/scripts/review.py \
+  --packet /tmp/review-packet.txt --output-dir /tmp/consensus-results
+```
+
+The packet includes the sanitized artifact, version, acceptance criteria and prior findings/responses. The helper hashes and preserves that packet, uses Claude with no tools/MCP/skills and safe mode, and stores `raw.json`, `stderr.log`, `status.json`, and a validated `review.md` in a new attempt directory. `reviewed` means a valid review, **not** consensus or permission to execute. `--model` is optional; the CLI default is preserved. Requires Python 3 and a Claude CLI supporting the listed flags (tested with 2.1.299). Each real round uses your Claude authentication and may incur model usage costs.
 
 ## Example run (round 1, real output, unedited)
 
@@ -108,6 +122,7 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 
 - `codex exec -s read-only` blocks **writes only**; Codex can still read outside the review directory. Mitigation here is a prompt-level read scope plus post-hoc audit of the log. Treat it as residual risk.
 - If the review directory is inside a git repo, Codex auto-loads that repo's `AGENTS.md` and follows it. The skill requires a directory outside any repo **and** `-c project_doc_max_bytes=0`.
+- Reverse calls use `--safe-mode --tools "" --strict-mcp-config --mcp-config '{"mcpServers":{}}' --disable-slash-commands --no-session-persistence`. Managed policy still applies. Review only the explicitly prepared packet; do not enable tools as a retry workaround.
 - Never send secrets, customer or financial data. Masking by command is not de-identification: read the whole copy before sending.
 - To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
@@ -122,8 +137,8 @@ Prompts and results for each round are in `examples/run-1/`, `run-2/`, `run-3/`.
 Issues and PRs are welcome; this is a one-person project, so expect slow replies.
 
 - **Bugs, questions, ideas:** open an [issue](https://github.com/kseungyong/claude-codex-consensus/issues). For vulnerabilities, use [SECURITY.md](SECURITY.md), not a public issue.
-- **Scripts:** `scripts/*.sh` must pass ShellCheck (CI runs it on every PR that touches `scripts/`).
-- **Changes to the rules in `SKILL.md`** (what the protocol requires or forbids) are design changes, so the protocol applies to them too. Describe the problem and the evidence, and expect the maintainer to run a Codex review round on the new version before merging. Wording-only fixes don't need this.
+- **Scripts:** `scripts/*.sh` must pass ShellCheck; the reverse helper must pass `python3 -m unittest discover -s tests -v` (both run in CI).
+- **Changes to the rules in `SKILL.md`** (what the protocol requires or forbids) are design changes, so the protocol applies to them too. Describe the problem and the evidence, and expect the maintainer to run the opposite reviewer on the new version before merging. Wording-only fixes don't need this.
 - **Keep both languages in sync:** a rule change in `SKILL.md` needs the matching change in `SKILL.ko.md`; the two are reviewed for equivalence.
 - Don't commit review artifacts that contain secrets, customer data or personal files. Mask them first and read the whole copy.
 

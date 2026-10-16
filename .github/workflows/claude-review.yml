@@ -1,0 +1,18 @@
+name: Claude review helper tests
+on:
+  push:
+    branches: [main]
+    paths: ['skills/claude-consensus/**', 'tests/**', '.github/workflows/claude-review.yml']
+  pull_request:
+    paths: ['skills/claude-consensus/**', 'tests/**', '.github/workflows/claude-review.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -v
